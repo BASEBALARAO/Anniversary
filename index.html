@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>For You, My Witcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --void: #07050f;
+  --deep: #110d1e;
+  --card: #160e28;
+  --violet: #7b3fa0;
+  --violet-bright: #a855f7;
+  --violet-glow: #c084fc;
+  --crimson: #9b1c3a;
+  --crimson-bright: #e11d5a;
+  --gold: #c9a84c;
+  --gold-light: #f0d080;
+  --silver: #c8c0d8;
+  --silver-dim: #7a7090;
+  --rune-border: #3d2060;
+}
+
+html { height: 100%; }
+
+body {
+  font-family: 'EB Garamond', serif;
+  background: var(--void);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Stars */
+#starfield { position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden; }
+.star {
+  position:absolute;border-radius:50%;background:#fff;
+  animation: twinkle ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,100%{opacity:0.1;transform:scale(1)}
+  50%{opacity:0.85;transform:scale(1.5)}
+}
+
+/* Floating rune particles */
+.rune-particle {
+  position:fixed;pointer-events:none;
+  font-family:'Cinzel',serif;
+  color:var(--violet-glow);
+  opacity:0;font-size:1rem;z-index:0;
+  animation:runeFloat linear infinite;
+  text-shadow:0 0 8px var(--violet-bright);
+}
+@keyframes runeFloat {
+  0%   {transform:translateY(110vh) rotate(0deg);opacity:0}
+  10%  {opacity:0.5}
+  90%  {opacity:0.25}
+  100% {transform:translateY(-80px) rotate(360deg);opacity:0}
+}
+
+/* Click burst */
+.burst {
+  position:fixed;pointer-events:none;z-index:999;
+  animation:burstAnim 0.75s ease forwards;
+}
+@keyframes burstAnim {
+  0%   {opacity:1;transform:translate(-50%,-50%) scale(0.3)}
+  100% {opacity:0;transform:translate(var(--bx),var(--by)) scale(1.5)}
+}
+
+/* Ambient orbs */
+.orb {
+  position:fixed;border-radius:50%;
+  filter:blur(90px);pointer-events:none;z-index:0;
+}
+.orb1{width:340px;height:340px;background:#4a1a7a2a;top:-80px;left:-100px;animation:orbDrift 9s ease-in-out infinite alternate}
+.orb2{width:300px;height:300px;background:#6b0f2a2a;bottom:-50px;right:-80px;animation:orbDrift 11s ease-in-out infinite alternate-reverse}
+.orb3{width:220px;height:220px;background:#2a0a5022;top:45%;left:50%;transform:translateX(-50%);animation:orbDrift 7s ease-in-out infinite alternate}
+@keyframes orbDrift{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.25) translate(18px,-18px)}}
+
+/* Frame lines */
+.rune-frame{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--rune-border),var(--violet-bright),var(--rune-border),transparent);z-index:5;pointer-events:none}
+.rune-frame-top{top:0}
+.rune-frame-bot{bottom:0}
+
+/* ══ PIN PAGE ══ */
+#pin-page {
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:1.5rem 1rem;position:relative;z-index:2;
+}
+
+.pin-card {
+  background:linear-gradient(160deg,#1c1035ee 0%,#0f0820ee 100%);
+  border:1px solid var(--rune-border);
+  border-radius:4px;
+  padding:2.6rem 2.2rem 2rem;
+  max-width:390px;width:100%;
+  text-align:center;position:relative;z-index:2;
+  box-shadow:0 0 50px #4a1a7a38,0 0 100px #4a1a7a14,inset 0 1px 0 #6030a028;
+}
+.pin-card::before,.pin-card::after{content:'✦';position:absolute;font-size:.65rem;color:var(--gold);opacity:.55}
+.pin-card::before{top:9px;left:13px}
+.pin-card::after{top:9px;right:13px}
+.cc{position:absolute;font-size:.65rem;color:var(--gold);opacity:.55;pointer-events:none}
+.cc-bl{bottom:9px;left:13px}
+.cc-br{bottom:9px;right:13px}
+
+/* Sigil SVG */
+.sigil-wrap{margin-bottom:.9rem}
+.sigil{width:66px;height:66px;margin:0 auto;display:block;animation:sigilPulse 4s ease-in-out infinite}
+@keyframes sigilPulse{
+  0%,100%{filter:drop-shadow(0 0 5px var(--violet-bright))}
+  50%{filter:drop-shadow(0 0 18px var(--violet-glow)) drop-shadow(0 0 6px var(--gold))}
+}
+
+.pin-title {
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1rem,4.5vw,1.5rem);
+  font-weight:400;color:var(--gold-light);
+  letter-spacing:.05em;margin-bottom:.3rem;
+  text-shadow:0 0 22px #c9a84c70;
+}
+.pin-subtitle {
+  font-family:'Cinzel',serif;
+  font-size:.68rem;color:var(--silver-dim);
+  letter-spacing:.18em;text-transform:uppercase;
+  margin-bottom:1.8rem;
+}
+
+/* Dots */
+.dots-row{display:flex;justify-content:center;gap:13px;margin-bottom:1.8rem}
+.dot {
+  width:13px;height:13px;border-radius:50%;
+  border:1.5px solid var(--rune-border);
+  background:transparent;transition:all .22s;
+}
+.dot.filled {
+  background:var(--violet-bright);
+  border-color:var(--violet-glow);
+  box-shadow:0 0 8px var(--violet-bright),0 0 18px #a855f750;
+  transform:scale(1.22);
+}
+.dot.shake{animation:dotShake .45s ease}
+@keyframes dotShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+
+/* Keypad */
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:1rem}
+.key {
+  background:linear-gradient(160deg,#1e1438,#150d28);
+  border:1px solid var(--rune-border);
+  border-radius:3px;
+  padding:.88rem 0;
+  font-size:1.22rem;
+  font-family:'Cinzel',serif;
+  color:var(--silver);
+  cursor:pointer;
+  transition:all .15s;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:inset 0 1px 0 #3d206028;
+  letter-spacing:.04em;
+  position:relative;
+  overflow:hidden;
+}
+.key:hover{border-color:var(--violet);color:var(--gold-light);box-shadow:0 0 14px #7b3fa038,inset 0 1px 0 #60309048}
+.key:active{transform:scale(0.92);border-color:var(--violet-bright);color:var(--gold-light)}
+.key.wide{grid-column:span 2}
+.key.del{font-size:.88rem;color:var(--silver-dim)}
+
+.pin-error {
+  font-family:'Cinzel',serif;
+  font-size:.7rem;color:var(--crimson-bright);
+  letter-spacing:.12em;
+  margin-top:.5rem;min-height:1.2em;
+  opacity:0;transition:opacity .3s;
+  text-shadow:0 0 12px var(--crimson-bright);
+}
+.pin-error.show{opacity:1}
+.pin-hint {
+  font-family:'EB Garamond',serif;
+  font-size:.82rem;font-style:italic;
+  color:var(--silver-dim);margin-top:.4rem;
+}
+
+.unlocking{animation:unlockFlare .8s ease}
+@keyframes unlockFlare{
+  0%  {box-shadow:0 0 50px #4a1a7a38}
+  40% {box-shadow:0 0 80px #a855f790,0 0 150px #a855f730}
+  100%{box-shadow:0 0 50px #4a1a7a38}
+}
+
+/* ══ LETTER PAGE ══ */
+#letter-page {
+  display:none;min-height:100vh;
+  padding:2.5rem 1rem 5rem;
+  position:relative;z-index:2;
+}
+
+.letter-wrap{max-width:700px;margin:0 auto;position:relative;z-index:2}
+
+.letter-header{text-align:center;margin-bottom:2.5rem;animation:fadeUp 1.2s ease both}
+.letter-emblem{width:80px;height:80px;margin:0 auto 1.2rem;display:block;animation:emblemGlow 3.5s ease-in-out infinite}
+@keyframes emblemGlow{
+  0%,100%{filter:drop-shadow(0 0 8px #a855f770)}
+  50%{filter:drop-shadow(0 0 22px #c084fcb0) drop-shadow(0 0 5px var(--gold))}
+}
+
+.letter-to{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--silver-dim);margin-bottom:.4rem}
+.letter-name{font-family:'Cinzel Decorative',serif;font-size:clamp(1.6rem,5.5vw,2.7rem);font-weight:400;color:var(--gold-light);text-shadow:0 0 30px #c9a84c55;line-height:1.2}
+
+.divider{display:flex;align-items:center;gap:1rem;margin:1.8rem 0;animation:fadeUp 1.4s ease both}
+.divider-line{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--rune-border),transparent)}
+.divider-symbol{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;text-shadow:0 0 12px var(--gold);letter-spacing:.3em}
+
+.letter-paper {
+  background:linear-gradient(170deg,#1c1032 0%,#130b22 50%,#1a0e2e 100%);
+  border:1px solid var(--rune-border);
+  border-radius:4px;
+  padding:clamp(1.6rem,5vw,3rem) clamp(1.4rem,5vw,3rem) clamp(1.4rem,4vw,2.5rem);
+  position:relative;overflow:hidden;
+  box-shadow:0 0 50px #4a1a7a25,inset 0 1px 0 #6030a022;
+  animation:fadeUp 1.6s ease both;
+}
+.letter-paper::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--violet),var(--crimson),var(--violet),transparent);
+}
+
+.lc{position:absolute;font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);opacity:.4;pointer-events:none}
+.lc-tl{top:10px;left:14px}.lc-tr{top:10px;right:14px}
+.lc-bl{bottom:10px;left:14px}.lc-br{bottom:10px;right:14px}
+
+.letter-date{font-family:'Cinzel',serif;font-size:.66rem;letter-spacing:.14em;color:var(--silver-dim);text-align:right;margin-bottom:2rem;text-transform:uppercase}
+
+.letter-body{font-family:'EB Garamond',serif;font-size:clamp(1.05rem,2.5vw,1.22rem);line-height:2;color:#d4c8e8;font-weight:400}
+.letter-body p{margin-bottom:1.4rem}
+
+.salutation{
+  font-family:'Cinzel Decorative',serif !important;
+  font-size:clamp(1.1rem,3.5vw,1.38rem) !important;
+  color:var(--gold-light) !important;
+  text-shadow:0 0 16px #c9a84c55;
+  display:block;margin-bottom:1.6rem !important;
+}
+.highlight{color:var(--violet-glow);font-style:italic}
+
+.sign-off{margin-top:2rem;color:var(--silver-dim);font-style:italic}
+.signature{font-family:'Cinzel Decorative',serif;font-size:clamp(1.2rem,4vw,1.8rem);color:var(--gold-light);margin-top:.3rem;text-shadow:0 0 20px #c9a84c70}
+.final-line{font-style:italic;color:var(--gold-light) !important;text-shadow:0 0 12px #c9a84c40;margin-top:1.8rem !important}
+
+.letter-footer{text-align:center;margin-top:2.5rem;animation:fadeUp 2s ease both}
+.footer-runes{font-family:'Cinzel',serif;color:var(--violet-glow);font-size:1.2rem;letter-spacing:.6rem;text-shadow:0 0 10px var(--violet-bright);opacity:.6}
+.footer-note{font-family:'EB Garamond',serif;font-size:.92rem;font-style:italic;color:var(--silver-dim);margin-top:.8rem}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:480px){
+  .pin-card{padding:2rem 1.1rem 1.6rem}
+  .keypad{gap:7px}
+  .key{padding:.78rem 0;font-size:1.05rem}
+  .dots-row{gap:10px}
+}
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="rune-frame rune-frame-top"></div>
+<div class="rune-frame rune-frame-bot"></div>
+<div id="runes"></div>
+
+<!-- ══ PIN PAGE ══ -->
+<div id="pin-page">
+  <div class="pin-card" id="pinCard">
+    <span class="cc cc-bl">✦</span>
+    <span class="cc cc-br">✦</span>
+
+    <!-- Wolf medallion sigil -->
+    <div class="sigil-wrap">
+      <svg class="sigil" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="33" cy="33" r="31" stroke="#7b3fa0" stroke-width="1" stroke-dasharray="4 3" opacity=".7"/>
+        <circle cx="33" cy="33" r="27" stroke="#c9a84c" stroke-width=".5" opacity=".45"/>
+        <line x1="33" y1="6" x2="33" y2="60" stroke="#a855f7" stroke-width=".8" opacity=".4"/>
+        <line x1="6" y1="33" x2="60" y2="33" stroke="#a855f7" stroke-width=".8" opacity=".4"/>
+        <line x1="11" y1="11" x2="55" y2="55" stroke="#c9a84c" stroke-width=".5" opacity=".28"/>
+        <line x1="55" y1="11" x2="11" y2="55" stroke="#c9a84c" stroke-width=".5" opacity=".28"/>
+        <!-- Lock body -->
+        <rect x="22" y="29" width="22" height="16" rx="2.5" stroke="#c9a84c" stroke-width="1.2" fill="#1a0f30"/>
+        <!-- Lock shackle -->
+        <path d="M27 29 C27 22 39 22 39 29" stroke="#c9a84c" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Keyhole -->
+        <circle cx="33" cy="36" r="2.5" fill="#a855f7"/>
+        <line x1="33" y1="38.5" x2="33" y2="42" stroke="#a855f7" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1 class="pin-title">Enter the Witcher's Seal</h1>
+    <p class="pin-subtitle">Only the chosen one may pass</p>
+
+    <div class="dots-row" id="dots">
+      <div class="dot" id="d0"></div>
+      <div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+      <div class="dot" id="d4"></div>
+      <div class="dot" id="d5"></div>
+    </div>
+
+    <div class="keypad">
+      <button class="key" onclick="press('1',event)">1</button>
+      <button class="key" onclick="press('2',event)">2</button>
+      <button class="key" onclick="press('3',event)">3</button>
+      <button class="key" onclick="press('4',event)">4</button>
+      <button class="key" onclick="press('5',event)">5</button>
+      <button class="key" onclick="press('6',event)">6</button>
+      <button class="key" onclick="press('7',event)">7</button>
+      <button class="key" onclick="press('8',event)">8</button>
+      <button class="key" onclick="press('9',event)">9</button>
+      <button class="key wide" onclick="press('0',event)">0</button>
+      <button class="key del" onclick="del(event)">⌫</button>
+    </div>
+
+    <div class="pin-error" id="pin-error">✦ The seal rejects you ✦</div>
+    <p class="pin-hint">She who holds the secret knows the runes</p>
+  </div>
+</div>
+
+<!-- ══ LETTER PAGE ══ -->
+<div id="letter-page">
+  <div class="letter-wrap">
+
+    <div class="letter-header">
+      <svg class="letter-emblem" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="38" stroke="#7b3fa0" stroke-width=".8" stroke-dasharray="5 4" opacity=".6"/>
+        <circle cx="40" cy="40" r="32" stroke="#c9a84c" stroke-width=".5" opacity=".4"/>
+        <!-- Geralt & Yen heart -->
+        <path d="M40 56 C40 56 19 43 19 30 C19 23 24.5 19 30 19 C34.2 19 37.5 21.5 40 26 C42.5 21.5 45.8 19 50 19 C55.5 19 61 23 61 30 C61 43 40 56 40 56Z" fill="#7b1c35" stroke="#e11d5a" stroke-width=".9" opacity=".92"/>
+        <!-- Small star inside heart -->
+        <text x="40" y="37" text-anchor="middle" font-size="10" fill="#f0d080" font-family="serif" opacity=".8">✦</text>
+      </svg>
+
+      <p class="letter-to">a letter sealed with all my love, for</p>
+      <h1 class="letter-name">My Seeya 🌹</h1>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-symbol">✦ ᚢ ✦</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="letter-paper">
+      <span class="lc lc-tl">✦</span>
+      <span class="lc lc-tr">✦</span>
+      <span class="lc lc-bl">✦</span>
+      <span class="lc lc-br">✦</span>
+
+      <p class="letter-date">14th of May, 2025 &nbsp;·&nbsp; Our 1st Anniversary &nbsp;·&nbsp; Written from the heart</p>
+
+      <div class="letter-body">
+        <span class="salutation">Happy 1st Anniversary, My Dear Seeya 🌹</span>
+
+        <p>
+          Where should I start… First, Ahhh — <span class="highlight">where do I even begin.</span>
+        </p>
+
+        <p>
+          How fast the time flies with you. On this day, <span class="highlight">14th of May 2025</span>, I was somewhat in hope —
+          maybe I could get a rejection on my face. But I didn't know that my small guts to propose you,
+          to tell you how I feel about you… that feeling of telling you —
+          <span class="highlight">"Enough baby, stop seeking love in the wrong people. Give me a chance to love you."</span>
+        </p>
+
+        <p>
+          When we got into this relationship, I was so insecure. I'm still am, honestly 😅 —
+          I used to think, would I even work for a month? Then a year?
+          <span class="highlight">Aise hote hote… 1 year hone ko aa gya 😂😂</span>
+          The way we fought, but also kept our egos aside and came back to each other every single time.
+        </p>
+
+        <p>
+          And you know, right now while I'm writing you this, <span class="highlight">I feel so emotional</span> —
+          because out of 8.3 billion people, we crossed paths with each other.
+          And it's said that the shortest of delays changes everything.
+          That's why I'm writing you this letter with so much of my emotions —
+        </p>
+
+        <p>
+          This manipulation, cheating, gaslighting, love bombing, ego, toxicity —
+          <span class="highlight">I will never treat you with any of that.</span>
+          Right now, I am so serious about you. I want a life with you.
+          I am still a rookie, still learning, still trying to give you a good life —
+          so that one day I can be able to truly live <em>with</em> you.
+        </p>
+
+        <p>
+          I won't write you filmy dialogues. Just this —
+          <span class="highlight">I will work hard enough just to live a happy life with you.</span>
+          Because baby, I am not looking back anymore. No more "aisa karta toh hota, waisa karta toh hota."
+          Ab now — <span class="highlight">you are all that I have.</span>
+        </p>
+
+        <p class="final-line">
+          So lastly — please don't take away what this dumb kid is happy with. 🤕😋
+        </p>
+
+        <p class="sign-off">God bless you, my Wifey. Happy Anniversary to both of us. 🎉</p>
+        <p class="signature">Forever Yours ⚔️</p>
+      </div>
+    </div>
+
+    <div class="letter-footer">
+      <div class="footer-runes">ᚢ ᚱ ᚢ</div>
+      <p class="footer-note">"Out of 8.3 billion souls — the universe chose us for each other. I'll never stop being grateful for that."</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const CORRECT = '140525';
+let entered = '';
+const AC = window.AudioContext || window.webkitAudioContext;
+let actx = null;
+function getCtx(){ if(!actx) actx = new AC(); return actx; }
+
+function playClick(type){
+  try{
+    const ctx = getCtx(), now = ctx.currentTime;
+    if(type==='key'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';
+      o.frequency.setValueAtTime(1046,now);
+      o.frequency.exponentialRampToValueAtTime(698,now+0.14);
+      g.gain.setValueAtTime(0.16,now);
+      g.gain.exponentialRampToValueAtTime(0.001,now+0.2);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(now);o.stop(now+0.25);
+    } else if(type==='del'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';
+      o.frequency.setValueAtTime(440,now);
+      o.frequency.exponentialRampToValueAtTime(330,now+0.1);
+      g.gain.setValueAtTime(0.1,now);
+      g.gain.exponentialRampToValueAtTime(0.001,now+0.15);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(now);o.stop(now+0.2);
+    } else if(type==='unlock'){
+      [523,659,784,1047,1319,1568].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        const t=now+i*0.09;
+        o.type='sine';
+        o.frequency.setValueAtTime(f,t);
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.14,t+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+        o.connect(g);g.connect(ctx.destination);
+        o.start(t);o.stop(t+0.45);
+      });
+    } else if(type==='wrong'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(220,now);
+      o.frequency.exponentialRampToValueAtTime(100,now+0.35);
+      g.gain.setValueAtTime(0.09,now);
+      g.gain.exponentialRampToValueAtTime(0.001,now+0.4);
+      o.connect(g);g.connect(ctx.destination);
+      o.start(now);o.stop(now+0.45);
+    }
+  }catch(e){}
+}
+
+function spawnBurst(x,y){
+  const sym=['✦','✧','⋆','*','·','ᚢ'];
+  const col=['#a855f7','#c084fc','#c9a84c','#f0d080','#e11d5a','#f472b6'];
+  for(let i=0;i<7;i++){
+    const b=document.createElement('div');
+    b.className='burst';
+    b.textContent=sym[Math.floor(Math.random()*sym.length)];
+    const angle=Math.random()*360;
+    const dist=25+Math.random()*45;
+    const dx=Math.cos(angle*Math.PI/180)*dist;
+    const dy=Math.sin(angle*Math.PI/180)*dist;
+    b.style.cssText=`left:${x}px;top:${y}px;color:${col[Math.floor(Math.random()*col.length)]};font-size:${0.55+Math.random()*.75}rem;text-shadow:0 0 6px currentColor;--bx:calc(-50% + ${dx}px);--by:calc(-50% + ${dy}px);animation-duration:${0.5+Math.random()*.4}s`;
+    document.body.appendChild(b);
+    setTimeout(()=>b.remove(),900);
+  }
+}
+
+// Starfield
+const sf=document.getElementById('starfield');
+for(let i=0;i<180;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  const sz=0.4+Math.random()*1.6;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-duration:${2+Math.random()*5}s;animation-delay:${Math.random()*6}s`;
+  sf.appendChild(s);
+}
+
+// Floating runes
+const runeSymbols=['ᚢ','ᚱ','ᚦ','ᚨ','ᚾ','ᛁ','ᛃ','ᛇ','ᛈ','ᛉ','✦','✧','⋆'];
+const rc=document.getElementById('runes');
+for(let i=0;i<14;i++){
+  const r=document.createElement('div');
+  r.className='rune-particle';
+  r.textContent=runeSymbols[i%runeSymbols.length];
+  r.style.cssText=`left:${Math.random()*100}vw;animation-duration:${15+Math.random()*18}s;animation-delay:${Math.random()*15}s;font-size:${.65+Math.random()*.65}rem`;
+  rc.appendChild(r);
+}
+
+function updateDots(){
+  for(let i=0;i<6;i++)
+    document.getElementById('d'+i).classList.toggle('filled',i<entered.length);
+}
+
+function press(digit,e){
+  if(entered.length>=6) return;
+  getCtx();
+  playClick('key');
+  if(e) spawnBurst(e.clientX,e.clientY);
+  entered+=digit;
+  updateDots();
+  if(entered.length===6) setTimeout(checkPin,140);
+}
+
+function del(e){
+  if(entered.length===0) return;
+  playClick('del');
+  if(e) spawnBurst(e.clientX,e.clientY);
+  entered=entered.slice(0,-1);
+  updateDots();
+  document.getElementById('pin-error').classList.remove('show');
+}
+
+function checkPin(){
+  if(entered===CORRECT){
+    playClick('unlock');
+    document.getElementById('pinCard').classList.add('unlocking');
+    setTimeout(()=>{
+      document.getElementById('pin-page').style.display='none';
+      document.getElementById('letter-page').style.display='block';
+      window.scrollTo(0,0);
+    },750);
+  } else {
+    playClick('wrong');
+    const err=document.getElementById('pin-error');
+    err.classList.add('show');
+    document.querySelectorAll('.dot').forEach(d=>d.classList.add('shake'));
+    setTimeout(()=>{
+      document.querySelectorAll('.dot').forEach(d=>d.classList.remove('shake','filled'));
+      entered='';
+      err.classList.remove('show');
+    },950);
+    setTimeout(()=>{ window.location.href='wrong.html'; },1050);
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('letter-page').style.display==='block') return;
+  if(e.key>='0'&&e.key<='9') press(e.key,null);
+  if(e.key==='Backspace') del(null);
+});
+</script>
+</body>
+</html>

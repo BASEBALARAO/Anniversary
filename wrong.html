@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title> </title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --void:#04030a;
+  --violet:#7b3fa0;
+  --violet-bright:#a855f7;
+  --crimson:#9b1c3a;
+  --crimson-bright:#e11d5a;
+  --gold:#c9a84c;
+  --gold-light:#f0d080;
+  --silver:#c8c0d8;
+  --silver-dim:#5a5070;
+  --rune-border:#2a1445;
+}
+
+html,body{height:100%}
+
+body{
+  font-family:'EB Garamond',serif;
+  background:var(--void);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Starfield */
+#sf{position:fixed;inset:0;z-index:0;pointer-events:none}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.05}50%{opacity:.55}}
+
+/* Orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0}
+.o1{width:280px;height:280px;background:#1a083325;top:-60px;left:-60px;animation:od 9s ease-in-out infinite alternate}
+.o2{width:260px;height:260px;background:#3b050f20;bottom:-50px;right:-50px;animation:od 12s ease-in-out infinite alternate-reverse}
+@keyframes od{0%{transform:scale(1)}100%{transform:scale(1.3) translate(12px,-12px)}}
+
+/* Frame lines */
+.rf{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--rune-border),var(--crimson),var(--rune-border),transparent);z-index:5;pointer-events:none}
+.rf-t{top:0}.rf-b{bottom:0}
+
+/* Main content */
+.scene{
+  position:relative;z-index:2;
+  text-align:center;
+  padding:2rem 1.4rem;
+  max-width:520px;
+  width:100%;
+  animation:sceneIn 1.8s ease both;
+}
+@keyframes sceneIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* Broken heart SVG */
+.broken-heart{
+  width:clamp(70px,18vw,100px);
+  height:clamp(70px,18vw,100px);
+  margin:0 auto 2rem;
+  display:block;
+  animation:heartbreak 3s ease-in-out infinite;
+}
+@keyframes heartbreak{
+  0%,100%{filter:drop-shadow(0 0 6px #9b1c3a80)}
+  50%{filter:drop-shadow(0 0 18px #e11d5ab0)}
+}
+
+/* Ornament */
+.ornament{
+  font-family:'Cinzel',serif;
+  color:var(--crimson-bright);
+  font-size:clamp(.7rem,2vw,.85rem);
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  opacity:.5;
+  margin-bottom:1.4rem;
+  text-shadow:0 0 10px var(--crimson-bright);
+}
+
+/* The quote */
+.quote-wrap{
+  position:relative;
+  margin:0 auto;
+  padding:0 1rem;
+}
+
+.quote-mark{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(2.5rem,8vw,4rem);
+  color:var(--crimson);
+  line-height:.6;
+  opacity:.35;
+  display:block;
+  user-select:none;
+}
+.quote-mark.open{text-align:left;margin-bottom:.2rem}
+.quote-mark.close{text-align:right;margin-top:.2rem}
+
+.quote-text{
+  font-family:'EB Garamond',serif;
+  font-size:clamp(1.55rem,5.5vw,2.4rem);
+  font-style:italic;
+  font-weight:400;
+  color:var(--silver);
+  line-height:1.45;
+  letter-spacing:.02em;
+  text-shadow:0 0 30px #c8c0d818;
+  animation:fadeWords 2.4s ease both .4s;
+}
+@keyframes fadeWords{from{opacity:0;letter-spacing:.08em}to{opacity:1;letter-spacing:.02em}}
+
+/* Accent word */
+.accent{
+  color:var(--crimson-bright);
+  text-shadow:0 0 14px #e11d5a60;
+  font-style:italic;
+}
+
+/* Divider */
+.divider{
+  display:flex;align-items:center;gap:.8rem;
+  margin:2rem auto;max-width:260px;
+  animation:sceneIn 2.2s ease both;
+}
+.dl{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--rune-border),transparent)}
+.ds{font-family:'Cinzel',serif;color:var(--silver-dim);font-size:.75rem;letter-spacing:.2em}
+
+/* Sub-text */
+.sub{
+  font-family:'Cinzel',serif;
+  font-size:clamp(.62rem,2vw,.74rem);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--silver-dim);
+  opacity:.6;
+  animation:sceneIn 2.4s ease both;
+}
+
+/* Try again */
+.try-btn{
+  display:inline-block;
+  margin-top:2.2rem;
+  padding:.6rem 1.8rem;
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--silver-dim);
+  border:1px solid var(--rune-border);
+  border-radius:3px;
+  text-decoration:none;
+  transition:all .2s;
+  animation:sceneIn 2.6s ease both;
+  -webkit-tap-highlight-color:transparent;
+}
+.try-btn:hover{color:var(--gold-light);border-color:var(--gold);text-shadow:0 0 12px var(--gold)}
+.try-btn:active{transform:scale(.95)}
+
+/* Floating crimson rune particles */
+.rp{
+  position:fixed;pointer-events:none;
+  font-family:'Cinzel',serif;
+  opacity:0;z-index:0;
+  animation:rf2 linear infinite;
+  text-shadow:0 0 8px var(--crimson-bright);
+  color:var(--crimson-bright);
+}
+@keyframes rf2{
+  0%  {transform:translateY(110vh) rotate(0deg);opacity:0}
+  10% {opacity:.35}
+  90% {opacity:.15}
+  100%{transform:translateY(-60px) rotate(-180deg);opacity:0}
+}
+
+@media(max-width:380px){
+  .quote-text{font-size:1.35rem}
+  .scene{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<div id="sf"></div>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="rf rf-t"></div>
+<div class="rf rf-b"></div>
+<div id="rp"></div>
+
+<div class="scene">
+
+  <!-- Broken heart SVG -->
+  <svg class="broken-heart" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Left half -->
+    <path d="M50 78 C50 78 10 55 10 32 C10 20 18 14 27 14 C34 14 40 18 44 24 L50 36 L44 46 L50 78Z"
+          fill="#5a0f1e" stroke="#e11d5a" stroke-width="1" opacity=".9"/>
+    <!-- Right half — slightly separated -->
+    <path d="M52 78 C52 78 90 55 90 32 C90 20 82 14 73 14 C66 14 60 18 56 24 L50 36 L56 46 L52 78Z"
+          fill="#5a0f1e" stroke="#9b1c3a" stroke-width="1" opacity=".9"/>
+    <!-- Crack line -->
+    <path d="M50 14 L44 36 L56 46 L50 78" stroke="#e11d5a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>
+    <!-- Glow dots on crack -->
+    <circle cx="44" cy="36" r="1.5" fill="#f472b6" opacity=".7"/>
+    <circle cx="56" cy="46" r="1.5" fill="#f472b6" opacity=".7"/>
+    <!-- Outer rune ring -->
+    <circle cx="50" cy="44" r="46" stroke="#3d1020" stroke-width=".6" stroke-dasharray="3 4" opacity=".4"/>
+  </svg>
+
+  <p class="ornament">✦ &nbsp; the seal has spoken &nbsp; ✦</p>
+
+  <div class="quote-wrap">
+    <span class="quote-mark open">"</span>
+    <p class="quote-text">You don't <span class="accent">love</span> me.</p>
+    <span class="quote-mark close">"</span>
+  </div>
+
+  <div class="divider">
+    <div class="dl"></div>
+    <span class="ds">ᚢ ✦ ᚢ</span>
+    <div class="dl"></div>
+  </div>
+
+  <p class="sub">only the true one may enter</p>
+
+  <a href="index.html" class="try-btn">← Try Again</a>
+
+</div>
+
+<script>
+// Stars
+const sf=document.getElementById('sf');
+for(let i=0;i<140;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  const sz=.3+Math.random()*1.2;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-duration:${2.5+Math.random()*5}s;animation-delay:${Math.random()*6}s`;
+  sf.appendChild(s);
+}
+// Crimson rune particles
+const syms=['ᚢ','ᚱ','ᚦ','✦','✧','⋆','·'];
+const rp=document.getElementById('rp');
+for(let i=0;i<10;i++){
+  const r=document.createElement('div');
+  r.className='rp';
+  r.textContent=syms[i%syms.length];
+  r.style.cssText=`left:${Math.random()*100}vw;animation-duration:${16+Math.random()*18}s;animation-delay:${Math.random()*16}s;font-size:${.55+Math.random()*.55}rem`;
+  rp.appendChild(r);
+}
+</script>
+</body>
+</html>
